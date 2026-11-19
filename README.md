@@ -35,5 +35,3 @@ Database (MongoDB)
 * Listing Module
 * Booking Module
 * Review Module
-  
->>>>>>> d5ec80961be83de1b01a1b2d362aecddb5cd020a
