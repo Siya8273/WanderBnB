@@ -1,66 +1,88 @@
 // init/index.js
+
 const mongoose = require("mongoose");
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
-const User = require("../models/user.js"); // ✅ ADDED THIS LINE
+const User = require("../models/user.js");
 
 const Mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
 
-main()
-  .then(() => {
-    console.log("✅ Connected to DB");
-  })
-  .catch((err) => {
-    console.log("❌ DB Error:", err);
+const demoHostsData = [
+  { username: "beachlover_raj", email: "raj@wanderbnb.com", password: "raj123" },
+  { username: "hillgirl_priya", email: "priya@wanderbnb.com", password: "priya123" },
+  { username: "desertking_vik", email: "vik@wanderbnb.com", password: "vik123" },
+  { username: "lakequeen_maya", email: "maya@wanderbnb.com", password: "maya123" },
+  { username: "citystar_neha", email: "neha@wanderbnb.com", password: "neha123" },
+];
+
+async function getOrCreateHost(hostData) {
+  // Check whether the host already exists
+  let host = await User.findOne({
+    $or: [
+      { username: hostData.username },
+      { email: hostData.email },
+    ],
   });
 
-async function main() {
-  await mongoose.connect(Mongo_url);
+  // Create the host only if they don't already exist
+  if (!host) {
+    host = await User.register(
+      new User({
+        username: hostData.username,
+        email: hostData.email,
+      }),
+      hostData.password
+    );
+
+    console.log(`Created host: ${hostData.username}`);
+  } else {
+    console.log(`Existing host reused: ${hostData.username}`);
+  }
+
+  return host;
 }
 
-const initDB = async () => {
+async function initDB() {
   try {
-    await Listing.deleteMany({});
+    await mongoose.connect(Mongo_url);
+    console.log("Connected to MongoDB!");
 
-    // ✅ Create 5 demo hosts
-    const demoHosts = await Promise.all([
-      User.register(
-        new User({ username: "beachlover_raj", email: "raj@wanderbnb.com" }),
-        "raj123"
-      ),
-      User.register(
-        new User({ username: "hillgirl_priya", email: "priya@wanderbnb.com" }),
-        "priya123"
-      ),
-      User.register(
-        new User({ username: "desertking_vik", email: "vik@wanderbnb.com" }),
-        "vik123"
-      ),
-      User.register(
-        new User({ username: "lakequeen_maya", email: "maya@wanderbnb.com" }),
-        "maya123"
-      ),
-      User.register(
-        new User({ username: "citystar_neha", email: "neha@wanderbnb.com" }),
-        "neha123"
-      ),
-    ]);
-
-    // ✅ Assign hosts to listings (rotate through 5 hosts)
-    const listingsWithHosts = initData.data.map((listing, index) => ({
-      ...listing,
-      owner: demoHosts[index % demoHosts.length]._id,
-    }));
-
-    await Listing.insertMany(listingsWithHosts);
-    console.log(
-      `✅ ${demoHosts.length} demo hosts + ${listingsWithHosts.length} listings created!`
+    // Get or create the demo hosts
+    const demoHosts = await Promise.all(
+      demoHostsData.map((host) => getOrCreateHost(host))
     );
+
+    // Insert or update listings without deleting existing documents
+    for (let i = 0; i < initData.data.length; i++) {
+      const listing = initData.data[i];
+
+      const owner = demoHosts[i % demoHosts.length];
+
+      await Listing.findOneAndUpdate(
+        {
+          title: listing.title,
+          location: listing.location,
+        },
+        {
+          $set: {
+            ...listing,
+            owner: owner._id,
+          },
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
+    }
+
+    console.log(`Successfully seeded ${initData.data.length} listings!`);
   } catch (error) {
-    console.error("❌ Init error:", error);
+    console.error("Initialization error:", error);
   } finally {
-    mongoose.connection.close();
+    await mongoose.connection.close();
+    console.log("MongoDB connection closed.");
   }
-};
+}
 
 initDB();
