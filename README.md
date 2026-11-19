@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Great 👏 you’re at the final stage now — let’s make this **simple, clean, and submission-ready**.
 
 I’ll give you exactly what you need for all 3 deliverables ✅
@@ -170,3 +171,23 @@ User → Frontend → Backend → Database
 * Bootstrap
 
 In today’s world, travelers face difficulty in finding reliable and affordable accommodations. Traditional booking systems lack personalization, role-based access (host/user), and real-time interaction.Wanderbnb simplifies property booking by integrating user-friendly UI, role-based dashboards, and real-time booking management.
+=======
+# WanderBnB-Your Gateway to Stays
+WanderBNB is a full-stack web application inspired by Airbnb that allows users to explore accommodations, create and manage property listings, book stays, and share reviews. Built with modern web technologies, it provides a user-friendly platform for discovering places to stay.
+
+# Features
+- User authentication and authorization
+- Create, edit, and manage property listings
+- Browse accommodation listings
+- Booking management
+- Reviews and ratings
+- Responsive user interface
+
+# Tech Stack
+- Frontend: HTML, CSS, Bootstrap, EJS
+- Backend: Node.js, Express.js
+- Database: MongoDB
+- Authentication: Passport.js
+- Other Tools: Git, GitHub, vscode
+
+>>>>>>> d5ec80961be83de1b01a1b2d362aecddb5cd020a
